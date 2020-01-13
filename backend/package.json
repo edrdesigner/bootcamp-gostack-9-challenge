@@ -8,8 +8,8 @@
   "scripts": {
     "setup:db": "yarn sequelize db:migrate && yarn sequelize db:seed:all",
     "dev": "nodemon src/server",
-    "queue": "nodemon src/queue",
     "dev:debug": "nodemon --inspect src/server.js",
+    "queue": "nodemon src/queue",
     "eslinty": "yarn eslint --fix src --ext .js"
   },
   "devDependencies": {
