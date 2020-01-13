@@ -8,9 +8,7 @@ class Subscription extends Model {
         end_date: Sequelize.DATE,
         price: Sequelize.DOUBLE,
       },
-      {
-        sequelize,
-      }
+      { sequelize }
     );
     return this;
   }

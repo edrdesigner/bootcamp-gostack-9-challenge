@@ -15,7 +15,7 @@ class SubscriptionController {
       order: ['start_date'],
       limit,
       offset: (page - 1) * limit,
-      attributes: ['id', 'start_date', 'end_date', 'price', 'acive'],
+      attributes: ['id', 'start_date', 'end_date', 'price'],
       include: [
         {
           model: User,
@@ -42,7 +42,7 @@ class SubscriptionController {
 
   async store(req, res) {
     const schema = Yup.object().shape({
-      stutend_id: Yup.number().required(),
+      student_id: Yup.number().required(),
       plan_id: Yup.number().required(),
       start_date: Yup.date().required(),
     });
@@ -136,12 +136,16 @@ class SubscriptionController {
       ],
     });
 
+    if (!subscription) {
+      return res.status(400).json({ error: 'Subscription does not exists' });
+    }
+
     return res.json(subscription);
   }
 
   async update(req, res) {
     const schema = Yup.object().shape({
-      stutend_id: Yup.number().required(),
+      student_id: Yup.number().required(),
       plan_id: Yup.number().required(),
       start_date: Yup.date().required(),
     });
