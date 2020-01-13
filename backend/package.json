@@ -6,7 +6,9 @@
   "author": "eduardo.reichert",
   "license": "MIT",
   "scripts": {
+    "setup:db": "yarn sequelize db:migrate && yarn sequelize db:seed:all",
     "dev": "nodemon src/server",
+    "dev:debug": "nodemon --inspect src/server.js",
     "eslinty": "yarn eslint --fix src --ext .js"
   },
   "devDependencies": {
@@ -24,6 +26,7 @@
     "bcryptjs": "^2.4.3",
     "bee-queue": "^1.2.2",
     "cors": "^2.8.5",
+    "date-fns": "^2.0.0-beta.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
