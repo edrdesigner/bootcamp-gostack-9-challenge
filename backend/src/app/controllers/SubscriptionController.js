@@ -15,7 +15,7 @@ class SubscriptionController {
       order: ['start_date'],
       limit,
       offset: (page - 1) * limit,
-      attributes: ['id', 'start_date', 'end_date', 'price'],
+      attributes: ['id', 'start_date', 'end_date', 'price', 'active'],
       include: [
         {
           model: User,
@@ -116,7 +116,7 @@ class SubscriptionController {
     const { id } = req.params;
 
     const subscription = await Subscription.findByPk(id, {
-      attributes: ['id', 'start_date', 'end_date', 'price'],
+      attributes: ['id', 'start_date', 'end_date', 'price', 'active'],
       include: [
         {
           model: User,
