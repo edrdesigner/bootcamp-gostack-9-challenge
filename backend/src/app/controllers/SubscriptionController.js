@@ -1,5 +1,7 @@
 import { isBefore, addMonths, parseISO, startOfDay } from 'date-fns';
 import * as Yup from 'yup';
+import Queue from '../../lib/Queue';
+import SubscriptionMail from '../jobs/SubscriptionMail';
 import Subscription from '../models/Subscription';
 import User from '../models/User';
 import Plan from '../models/Plan';
@@ -105,7 +107,7 @@ class SubscriptionController {
       ],
     });
 
-    // Add to queue to send email
+    await Queue.add(SubscriptionMail.key, { subscription });
 
     return res.json(subscription);
   }
@@ -137,9 +139,88 @@ class SubscriptionController {
     return res.json(subscription);
   }
 
-  async update(req, res) {}
+  async update(req, res) {
+    const schema = Yup.object().shape({
+      stutend_id: Yup.number().required(),
+      plan_id: Yup.number().required(),
+      start_date: Yup.date().required(),
+    });
 
-  async delete(req, res) {}
+    try {
+      await schema.validate(req.body, { abortEarly: false });
+    } catch (error) {
+      return res
+        .status(400)
+        .json({ errors: error.errors, error: 'Validation fails' });
+    }
+
+    const { id } = req.params;
+    const subscription = await Subscription.findByPk(id);
+
+    if (!subscription) {
+      return res.status(400).json({ error: 'Subscription does not exists' });
+    }
+
+    const { student_id, plan_id, start_date } = req.body;
+
+    const student = await Student.findByPk(student_id);
+    if (!student) {
+      return res.status(400).json({ error: 'Student does not exists' });
+    }
+
+    const plan = await Plan.findByPk(plan_id);
+
+    if (!plan) {
+      return res.status(400).json({ error: 'Plan does not exists' });
+    }
+
+    const startDate = parseISO(start_date);
+
+    if (isBefore(startOfDay(startDate), startOfDay(new Date()))) {
+      return res.status(400).json({ error: 'Past dates are not allowed' });
+    }
+
+    const end_date = addMonths(startDate, plan.duration);
+    const price = plan.price * plan.duration;
+
+    const subscriptionUpdated = await subscription.update({
+      start_date: startDate,
+      end_date,
+      student_id,
+      plan_id,
+      price,
+    });
+
+    return res.json(subscriptionUpdated);
+  }
+
+  async delete(req, res) {
+    const schema = Yup.object().shape({
+      id: Yup.number()
+        .positive()
+        .required(),
+    });
+
+    const { id } = req.params;
+
+    try {
+      await schema.validate({ id }, { abortEarly: true });
+    } catch (error) {
+      return res
+        .status(400)
+        .json({ errors: error.errors, error: 'Validation fails' });
+    }
+
+    const subscription = await Subscription.findByPk(id);
+
+    if (!subscription) {
+      return res.status(400).json({ error: 'Subscription does not exists' });
+    }
+
+    await Subscription.destroy({ where: { id } });
+
+    return res.send();
+  }
 }
 
 export default new SubscriptionController();
